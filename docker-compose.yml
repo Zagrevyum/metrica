@@ -1,0 +1,41 @@
+
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: metrica_db
+      POSTGRES_USER: metrica_user
+      POSTGRES_PASSWORD: metrica_pass
+    volumes:
+      - metrica_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+    restart: always
+    environment:
+      DATABASE_URL: postgres://metrica_user:metrica_pass@db:5432/metrica_db
+      JWT_SECRET: supersecretkey
+      EMAIL_USER: maquinaria@metricagrupoconstructor.com
+      EMAIL_PASS: dummy_password
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  metrica_pgdata:
